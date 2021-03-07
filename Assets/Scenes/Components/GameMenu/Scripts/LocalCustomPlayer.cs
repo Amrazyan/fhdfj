@@ -36,7 +36,7 @@ public class LocalCustomPlayer : NetworkCustomPlayer
     public override void ReceiveDamage()
     {
         base.ReceiveDamage();
-        this.Health -= 10;
+        this.Health -= UnityEngine.Random.Range(2,13);
         Debug.Log(this.Health);
         if (this.Health <= 0)
         {
