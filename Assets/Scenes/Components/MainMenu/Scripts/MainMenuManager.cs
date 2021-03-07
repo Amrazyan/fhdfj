@@ -26,9 +26,15 @@ public class MainMenuManager : MonoBehaviour
         _instance = this;
     }
 
+    private void OnDestroy()
+    {
+        _instance = null;
+    }
+
     private void Start()
     {
         this.buttonMenu.onClick.AddListener(GotoMenu);
+        this.buttonConnect.onClick.AddListener(ConnectionManager.instance.Connect);
         StartCoroutine(LoadLoginInfo());
     }
 

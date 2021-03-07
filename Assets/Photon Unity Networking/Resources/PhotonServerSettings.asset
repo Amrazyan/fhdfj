@@ -46,4 +46,6 @@ MonoBehaviour:
   - ReceiveDamage
   - OnLose
   - OnWin
+  - StartGame
+  - ChangeTurn
   DisableAutoOpenWizard: 1

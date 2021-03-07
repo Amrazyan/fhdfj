@@ -5,13 +5,10 @@ using UnityEngine;
 public class RemoteCustomPlayer : NetworkCustomPlayer
 {
 
-    private void Awake()
-    {
-        GameLogicManager.Instance.EnemyPlayer = this;
-    }
-
     private void Start()
     {
+        Debug.Log("RemoteCustomPlayer");
+        GameLogicManager.Instance.EnemyPlayer = this;
         GameLogicManager.Instance.SetHealthRemote(Health);
     }
 

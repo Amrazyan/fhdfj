@@ -10,6 +10,7 @@ public class LocalCustomPlayer : NetworkCustomPlayer
 
     private void Awake()
     {
+        Debug.Log("LocalCustomPlayer");
         GameLogicManager.Instance.LocalPlayer = this;
     }
 
@@ -17,6 +18,7 @@ public class LocalCustomPlayer : NetworkCustomPlayer
     {
         GameLogicManager.Instance.SetHealthLocal(Health);
         GameLogicManager.Instance.buttonAttackEnemy.onClick.AddListener(Damage);
+        GameLogicManager.Instance.buttonAttackEnemy.onClick.AddListener(GameLogicManager.Instance.ChangeTurnAllPlayers);
     }
 
     protected override void OnHealthChanged(int val)
@@ -39,9 +41,35 @@ public class LocalCustomPlayer : NetworkCustomPlayer
         if (this.Health <= 0)
         {
             Debug.Log("OnLoseOnLoseOnLose");
-            this.ThisPhotonView.RPC("OnLose", PhotonTargets.All);
-            GameLogicManager.Instance.EnemyPlayer.ThisPhotonView.RPC("OnWin", PhotonTargets.All);
+            this.Lose();
+            GameLogicManager.Instance.EnemyPlayer.Win();
         }
+    }
+
+    [PunRPC]
+    public override void StartGame()
+    {
+        base.StartGame();
+        if (PhotonNetwork.isMasterClient)
+        {
+            
+            IsMyTurn = true;
+        }
+        else
+        {
+            IsMyTurn = false;
+        }
+
+        Debug.Log("Timer started".Color(CustomExpandingMethods.Colors.red));
+        GameLogicManager.Instance.StartTimer();
+
+        //StartcountdownTimer
+    }
+
+    public override void OnTurnChanged()
+    {
+        GameLogicManager.Instance.buttonAttackEnemy.interactable = IsMyTurn;
+        GameLogicManager.Instance.StartTimer();
     }
 
     public override void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
