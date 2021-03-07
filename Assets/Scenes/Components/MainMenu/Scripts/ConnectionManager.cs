@@ -49,10 +49,7 @@ public class ConnectionManager : Photon.PunBehaviour//, IPunCallbacks
 		{
 			PhotonNetwork.ConnectUsingSettings(_gameVersion);
 		}
-		if (MainMenuManager.Instance)
-		{
-			MainMenuManager.Instance.textLog.text = "Waiting for a game";
-		}
+		
 	}
 	/// <summary>
 	/// When someone joined the room

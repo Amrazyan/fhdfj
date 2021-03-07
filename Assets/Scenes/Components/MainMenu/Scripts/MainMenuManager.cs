@@ -17,13 +17,16 @@ public class MainMenuManager : MonoBehaviour
 
     [SerializeField] InputField inputName;
     [SerializeField] Button buttonMenu;
-    public Text textLog;
+    [SerializeField] Text textLog;
+    [SerializeField] Text textPlayerName;
     public Button buttonConnect;
 
-     
+    private bool isConnecting;
+
     private void Awake()
     {
         _instance = this;
+        textPlayerName.text = PlayerPrefs.GetString("PlayerName");
     }
 
     private void OnDestroy()
@@ -34,8 +37,26 @@ public class MainMenuManager : MonoBehaviour
     private void Start()
     {
         this.buttonMenu.onClick.AddListener(GotoMenu);
-        this.buttonConnect.onClick.AddListener(ConnectionManager.instance.Connect);
+        this.buttonConnect.onClick.AddListener(TryConnect);
         StartCoroutine(LoadLoginInfo());
+    }
+
+    private void TryConnect()
+    {
+        if (isConnecting)
+        {
+            this.textLog.text = "";
+            PhotonNetwork.Disconnect();
+            buttonConnect.transform.GetChild(0).GetComponent<Text>().text = "Play";
+        }
+        else
+        {
+            this.textLog.text = "Waiting for a game";
+            ConnectionManager.instance.Connect();
+            buttonConnect.transform.GetChild(0).GetComponent<Text>().text = "Cancel";
+        }
+
+        isConnecting = !isConnecting;
     }
 
     private void GotoMenu()
@@ -43,6 +64,7 @@ public class MainMenuManager : MonoBehaviour
         loginPage.SetActive(false);
         lobbyPage.SetActive(true); 
     }
+
     string url = "http://localhost:53696/weatherforecast";
     IEnumerator LoadLoginInfo()
     {

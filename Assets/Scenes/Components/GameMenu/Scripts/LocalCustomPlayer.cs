@@ -69,6 +69,7 @@ public class LocalCustomPlayer : NetworkCustomPlayer
     public override void OnTurnChanged()
     {
         GameLogicManager.Instance.buttonAttackEnemy.interactable = IsMyTurn;
+        GameLogicManager.Instance.textTurn.text = IsMyTurn == true ? "Your turn" : "Enemy's turn";
         GameLogicManager.Instance.StartTimer();
     }
 

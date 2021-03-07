@@ -47,7 +47,7 @@ namespace ExitGames.Demos.DemoAnimator
 				}
 			}
 
-			PhotonNetwork.playerName =	defaultName;
+			PhotonNetwork.playerName = defaultName;
 		}
 
 		#endregion

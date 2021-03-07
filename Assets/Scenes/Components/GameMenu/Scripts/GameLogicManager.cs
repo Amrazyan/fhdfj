@@ -26,6 +26,7 @@ public class GameLogicManager : MonoBehaviour
     [SerializeField] Text textLogEnemyPlayer;
     [SerializeField] Image remotePlayerHealthBar;
     [SerializeField] Text textTimer;
+    public Text textTurn;
     public Button buttonAttackEnemy;
 
     private RemoteCustomPlayer enemyPlayer;

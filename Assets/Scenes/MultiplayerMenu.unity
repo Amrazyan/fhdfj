@@ -2169,6 +2169,7 @@ MonoBehaviour:
   inputName: {fileID: 552847600}
   buttonMenu: {fileID: 1328964368}
   textLog: {fileID: 1188927644}
+  textPlayerName: {fileID: 772039232}
   buttonConnect: {fileID: 881052925}
 --- !u!1 &2002319873
 GameObject:
