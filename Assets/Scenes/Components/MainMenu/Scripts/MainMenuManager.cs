@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
+using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -65,16 +67,26 @@ public class MainMenuManager : MonoBehaviour
         lobbyPage.SetActive(true); 
     }
 
-    string url = "http://localhost:53696/weatherforecast";
+    string url = "http://localhost:53696/userdata";
+    public string jsonData;
     IEnumerator LoadLoginInfo()
     {
-        Debug.Log("Load Login Info");
+        UnityWebRequest www = UnityWebRequest.Post(url, jsonData);
 
-        WWWForm form = new WWWForm();
-        form.AddField("username", "admin");
-        form.AddField("password", "Admin123#");
+        string sss = "{\"name\" : \"Arman\"}";//PlayerPrefs.GetString("PlayerName")
 
-        UnityWebRequest www = UnityWebRequest.Get(url);//, form);
+        var aaa = new
+        {
+            name = "Arman",
+        };
+        sss = JsonConvert.SerializeObject(aaa);
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(sss);
+
+        www.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+        www.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+        www.SetRequestHeader("Content-Type", "application/json");
+
         yield return www.SendWebRequest();
 
         if (www.isNetworkError)

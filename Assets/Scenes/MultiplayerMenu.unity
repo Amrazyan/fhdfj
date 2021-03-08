@@ -2171,6 +2171,9 @@ MonoBehaviour:
   textLog: {fileID: 1188927644}
   textPlayerName: {fileID: 772039232}
   buttonConnect: {fileID: 881052925}
+  jsonData: '{     "userSocs": [             "291123",             "291171",            
+    "312021",             "291071",             "152031",             "533011"        
+    ],     "collegeId": 1 }'
 --- !u!1 &2002319873
 GameObject:
   m_ObjectHideFlags: 0
