@@ -40,7 +40,6 @@ public class MainMenuManager : MonoBehaviour
     {
         this.buttonMenu.onClick.AddListener(GotoMenu);
         this.buttonConnect.onClick.AddListener(TryConnect);
-        StartCoroutine(LoadLoginInfo());
     }
 
     private void TryConnect()
@@ -63,23 +62,21 @@ public class MainMenuManager : MonoBehaviour
 
     private void GotoMenu()
     {
-        loginPage.SetActive(false);
-        lobbyPage.SetActive(true); 
+        StartCoroutine(LoadLoginInfo());
     }
 
     string url = "http://localhost:53696/userdata";
-    public string jsonData;
+
     IEnumerator LoadLoginInfo()
     {
-        UnityWebRequest www = UnityWebRequest.Post(url, jsonData);
-
-        string sss = "{\"name\" : \"Arman\"}";//PlayerPrefs.GetString("PlayerName")
-
         var aaa = new
         {
-            name = "Arman",
+            name = inputName.text,
         };
-        sss = JsonConvert.SerializeObject(aaa);
+
+        string sss = JsonConvert.SerializeObject(aaa);
+
+        UnityWebRequest www = UnityWebRequest.Post(url, sss);
 
         byte[] bodyRaw = Encoding.UTF8.GetBytes(sss);
 
@@ -95,8 +92,25 @@ public class MainMenuManager : MonoBehaviour
         }
         else
         {
+            error err = JsonConvert.DeserializeObject<error>(www.downloadHandler.text);
+            if (err.Code == 0)
+            {
+                PlayerPrefs.SetString("PlayerName", inputName.text);
+                textPlayerName.text = PlayerPrefs.GetString("PlayerName");
+                loginPage.SetActive(false);
+                lobbyPage.SetActive(true);
+            }
+            else
+            {
+                Debug.Log(err.Message);
+            }
+
             Debug.Log("Data: " + www.downloadHandler.text);
         }
     }
-
+    public class error
+    {
+        public int Code { get; set; }
+        public string Message { get; set; }
+    }
 }

@@ -8,6 +8,8 @@ public class NetworkCustomPlayer : Photon.PunBehaviour, IPunObservable
 
 
     private int health = 100;
+    private int score = 0;
+
     private PhotonView thisPhotonView;
     public PhotonView ThisPhotonView 
     {
