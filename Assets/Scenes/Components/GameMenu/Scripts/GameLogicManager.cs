@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Text;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -125,13 +128,69 @@ public class GameLogicManager : MonoBehaviour
     {
         winLoseMenu.Set(true);
         StopCoroutine(enumerator);
+        StartCoroutine(UpdateScore(true));
         currentPlayers.Clear();
     }
 
     private void OnLoose()
     {
-        Debug.Log("Gaemlogic OnLoose");
         winLoseMenu.Set(false);
+        StartCoroutine(UpdateScore(false));
+    }
+
+    IEnumerator UpdateScore(bool win)
+    {
+        
+        User userdata = new User
+        {
+            Name = PlayerPrefs.GetString("PlayerName"),
+            Score = 0,
+            Win = 0,
+            Lose = 0,
+        };
+
+        if (win)
+        {
+            userdata.Score = UnityEngine.Random.Range(40, 80);
+            userdata.Win = 1;
+            userdata.Lose = 0;
+        }
+        else
+        {
+            userdata.Score = UnityEngine.Random.Range(0, 20);
+            userdata.Win = 0;
+            userdata.Lose = 1;
+        }
+
+        string serializedData = JsonUtility.ToJson(userdata);
+        //string serializedData = JsonConvert.SerializeObject(userdata);
+        UnityWebRequest www = UnityWebRequest.Post(Gamemanager.Instance.url + "/updatescore", serializedData);
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(serializedData);
+
+        www.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+        www.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+        www.SetRequestHeader("Content-Type", "application/json");
+
+        yield return www.SendWebRequest();
+
+        if (www.isNetworkError)
+        {
+            Debug.Log(www.error);
+        }
+        else
+        {
+            error err = JsonUtility.FromJson<error>(www.downloadHandler.text);
+            if (err.Code == 0)
+            {
+
+            }
+            else
+            {
+                Debug.Log(err.Message);
+            }
+
+            Debug.Log("Data: " + www.downloadHandler.text);
+        }
     }
 
     private Coroutine enumerator;

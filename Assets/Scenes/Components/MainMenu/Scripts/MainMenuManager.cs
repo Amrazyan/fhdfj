@@ -21,9 +21,23 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] Button buttonMenu;
     [SerializeField] Text textLog;
     [SerializeField] Text textPlayerName;
+    [SerializeField] Text textLogMenu;
     public Button buttonConnect;
+    [SerializeField] LeaderBoardItem leaderItemPrefab;
+    [SerializeField] Transform scrollContent;
 
     private bool isConnecting;
+
+    private List<User> leaderBoardUsers;
+    public List<User> LeaderBoardUsers 
+    { 
+        get => leaderBoardUsers;
+        set 
+        { 
+            leaderBoardUsers = value;
+            OnLeaderBoardSetted();
+        } 
+    }
 
     private void Awake()
     {
@@ -40,6 +54,9 @@ public class MainMenuManager : MonoBehaviour
     {
         this.buttonMenu.onClick.AddListener(GotoMenu);
         this.buttonConnect.onClick.AddListener(TryConnect);
+
+        StartCoroutine(GetLeaderData());
+
     }
 
     private void TryConnect()
@@ -62,37 +79,59 @@ public class MainMenuManager : MonoBehaviour
 
     private void GotoMenu()
     {
+        textLogMenu.text = "GotoMenu";
         StartCoroutine(LoadLoginInfo());
     }
 
-    string url = "http://localhost:53696/userdata";
+    private void OnLeaderBoardSetted()
+    {
+        foreach (Transform item in scrollContent)
+        {
+            Destroy(item.gameObject);
+        }
+
+        foreach (User item in leaderBoardUsers)
+        {
+            LeaderBoardItem boardItem = Instantiate(leaderItemPrefab, scrollContent);
+            boardItem.Set(item);
+        }
+    }
 
     IEnumerator LoadLoginInfo()
     {
-        var aaa = new
+        User userdata = new User
         {
-            name = inputName.text,
+            Name = inputName.text,
         };
 
-        string sss = JsonConvert.SerializeObject(aaa);
+        textLogMenu.text = "BEFORE Serializing data";
+        string serializedData;
 
-        UnityWebRequest www = UnityWebRequest.Post(url, sss);
 
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(sss);
+        serializedData = JsonUtility.ToJson(userdata);
+        //serializedData = JsonConvert.SerializeObject(userdata);
+
+        Debug.Log(serializedData);
+        UnityWebRequest www = UnityWebRequest.Post(Gamemanager.Instance.url, serializedData);
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(serializedData);
 
         www.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
         www.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         www.SetRequestHeader("Content-Type", "application/json");
+        
+        textLogMenu.text = "Send web request";
 
         yield return www.SendWebRequest();
 
         if (www.isNetworkError)
         {
-            Debug.Log(www.error);
+            textLogMenu.text = "Network error " + www.error;
         }
         else
         {
-            error err = JsonConvert.DeserializeObject<error>(www.downloadHandler.text);
+            //error err = JsonConvert.DeserializeObject<error>(www.downloadHandler.text);
+            error err = JsonUtility.FromJson<error>(www.downloadHandler.text);
             if (err.Code == 0)
             {
                 PlayerPrefs.SetString("PlayerName", inputName.text);
@@ -104,13 +143,59 @@ public class MainMenuManager : MonoBehaviour
             {
                 Debug.Log(err.Message);
             }
-
-            Debug.Log("Data: " + www.downloadHandler.text);
+            textLogMenu.text = "" + www.downloadHandler.text;
+    
         }
     }
-    public class error
+    IEnumerator GetLeaderData()
     {
-        public int Code { get; set; }
-        public string Message { get; set; }
+        UnityWebRequest www = UnityWebRequest.Get(Gamemanager.Instance.url+ "/Getleader");
+       
+        yield return www.SendWebRequest();
+
+        if (www.isNetworkError)
+        {
+            textLogMenu.text = "Network error " + www.error;
+        }
+        else
+        {
+            //error err = JsonConvert.DeserializeObject<error>(www.downloadHandler.text);
+            Debug.Log(www.downloadHandler.text);
+
+            LeaderboardData data = JsonUtility.FromJson<LeaderboardData>(www.downloadHandler.text);
+            if (data.Code == 0)
+            {
+                this.LeaderBoardUsers = data.Data;
+            }
+            else
+            {
+                Debug.Log(data.Message);
+            }
+        }
     }
+
+   
+}
+
+[System.Serializable]
+public class error
+{
+    public int Code;
+    public string Message;
+}
+
+[System.Serializable]
+public class User
+{
+    public string Name;
+    public int Score;
+    public int Win;
+    public int Lose;
+}
+
+[System.Serializable]
+public class LeaderboardData : error
+{
+    public List<User> Data;
+    //public List<User> Data { get; set; }
 }
